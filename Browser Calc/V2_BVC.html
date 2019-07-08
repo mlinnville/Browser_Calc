@@ -1,0 +1,730 @@
+<head>
+	<meta charset="utf-8" />
+	<!-- Mobile Styling -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link href="https://fonts.googleapis.com/css?family=Lato:300,400,700|Playfair+Display" rel="stylesheet">
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+	<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+	<script src="./bootstrap/dist/js/bootstrap.js"></script>
+	<link rel="stylesheet" href="bootstrap.css">
+	<script src="V2_app.js"></script>
+	<title>Cost of Bad Data</title>
+</head>
+
+<body ng-app="app" ng-controller="Controller as ctr" ng-cloak>
+	<button class="back-button btn" ng-show="stage > 0" ng-click="backButtonClicked()"><i class="fa fa-chevron-left mr-2"></i>Back </button>
+	<div class="container mt-10" ng-show="stage == 0">
+		<div class="row justify-content-md-center">
+			<div class="col-md-8">
+				<h1 class="display-3">How much is bad data costing you?</h1>
+				<p>Consumers have more options than ever, which means that maintaining accurate information about your business online — wherever they can find you — is more important than ever.</p>
+				<p>With this calculator, you’ll be able to see just how much bad data could be costing your business and learn how you can address it.</p>
+				<button ng-click="stage = 1" class="btn-lg btn-primary btn-block mt-5">Get Started</button>
+			</div>
+		</div>
+	</div>
+
+	<div class="container progress mt-5" ng-show="stage == 1">
+  	<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="stage" aria-valuemin="1" aria-valuemax="4" style="width: 25%"></div>
+	</div>
+	<div class="container progress mt-5" ng-show="stage == 2">
+  	<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="stage" aria-valuemin="2" aria-valuemax="4" style="width: 50%"></div>
+	</div>
+	<div class="container progress mt-5" ng-show="stage == 3">
+  	<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="stage" aria-valuemin="3" aria-valuemax="4" style="width: 75%"></div>
+	</div>
+
+	<div class="container mt-5" ng-show="stage == 1">
+		<div class="row justify-content-md-center">
+			<div class="col-md-10">
+				<h1 class="display-4">What is your business name?</h1>
+				<input ng-model="nameOfBusiness" class="form-control mr-2" type="text" placeholder="Business Name">
+
+				<h1 class="display-4 mt-5">How many {{entityLabel}} do you have?</h1>
+				<div class="form-inline mt-3">
+					<input ng-model="numberOfLocations" ng-change="refresh()" class="form-control mr-2" type="Number">
+					<select name="" ng-model="entityLabel" id="" class="form-control mr-2">
+						<option ng-repeat="entity in entityOptions" value="{{entity}}">{{entity | capital}}</option>
+					</select>
+					<!-- <button ng-click="stage = 2" class="btn btn-primary">Next</button> -->
+				</div>
+				<h1 class="display-4 mt-5">What is your average transaction value?</h1>
+				<div class="input-group mt-3">
+					<div class="input-group-prepend">
+    				<span class="input-group-text">$</span>
+  				</div>
+					<input ng-model="averageSalePerCustomer" ng-change="refresh()" class="form-control" type="Number">
+					<div class="input-group-append">
+    				<span class="input-group-text">.00</span>
+  				</div>
+				</div>
+				<button ng-click="stage = 2" class="btn btn-primary btn-block mt-5">Next</button>
+			</div>
+		</div>
+	</div>
+
+
+	<div class="container mt-7" ng-show="stage == 2">
+		<div class="row justify-content-md-center">
+			<div class="col-md-10">
+				<h1 class="display-4">How accurate is {{businessName}}'s data?</h1>
+				<p>Take the accuracy percentage from the Knowledge Scan and enter it below.</p>
+
+				<div class="form-inline">
+					<div class="input-group mr-2 ">
+						<input ng-model="accuracyRate" ng-change="refresh()" class="form-control" type="Number">
+						<div class="input-group-append">
+							<span class="input-group-text">%</span>
+						</div>
+					</div>
+					<p class="mt-3">The number above is an estimate of the percentage of time consumers see correct information when they search for {{nameOfBusiness}} {{entityLabel}}.</p>
+
+				</div>
+
+				<!-- <p class="mt-4">{{accuracyRate}}% of the time customers search for you, they will see the correct information.</p> -->
+				<button ng-click="stage = 3" class="btn btn-primary btn-block mt-5">Next</button>
+				<!-- <p class="mt-7">If you haven’t scanned your business yet, you can scan one of your locations <a href="https://www.yext.com/pl/adw-only/index.html" target="_blank">here</a> to get your accuracy percentage estimate.</p> -->
+			</div> 
+				<!-- <button ng-click="toggleScanImage()" class="btn btn-outline-dark">scan a sample {{ entityLabel | singular }}</button></p> -->
+
+			<div class="col-md-8 mt-5" ng-show="displayScanImage == true">
+				<img src="img/scan.png"></img>
+				<button ng-click="generateScanOutput()" class="btn btn-primary">(Run Scan)</button>
+			</div>
+			<div class="col-md-8 mt-5" ng-show="displayScanResult == true">
+				<p>Your scan returned a <strong>72</strong> and has been updated above!</p>
+				<p>Click <button ng-click="stage = 3" class="btn btn-primary">Next</button> to continue...</p>
+			</div>
+		</div>
+	</div>
+	<div class="container mt-7" ng-show="stage == 3">
+		<div class="row justify-content-md-center">
+			<div class="col-md-10">
+				<h1 class="display-4">How many Google My Business impressions does {{nameOfBusiness}} get today?</h1>
+				<div class="mt-5">
+					<p>If you know the total Google My Business impressions your business receives per year, you can enter it here:</p>
+					<button ng-click="showAdditionalInputs()" class="btn btn-secondary btn-sm">Enter Additional Information</button>
+				</div>
+				<div ng-show="displayAdditionalInputs == true">
+					<div class="form-inline">
+						<div class="input-group mr-2 mt-3">
+							<input ng-model="annualGMBImpressions" ng-change="setImpressionsBasedOnGMB()" class="form-control" type="Number">
+							<div class="input-group-append">
+								<span class="input-group-text">Annual GMB Impressions per {{entityLabel | singular}}</span>
+							</div>
+						</div>
+						<div class="input-group mr-2 mt-3">
+							<input ng-model="actionRate" ng-change="setImpressionsBasedOnGMB()" class="form-control" type="Number">
+							<div class="input-group-append">
+								<span class="input-group-text">Listings Click through Rate</span>
+							</div>
+						</div>
+						<div class="input-group mr-2 mt-3">
+							<input ng-model="conversion1" ng-change="setImpressionsBasedOnGMB()" class="form-control" type="Number">
+							<div class="input-group-append">
+								<span class="input-group-text">Online to Offline or Appointment Booking Rate</span>
+							</div>
+						</div>
+						<div class="input-group mr-2 mt-3">
+							<input ng-model="conversion2" ng-change="setImpressionsBasedOnGMB()" class="form-control" type="Number">
+							<div class="input-group-append">
+								<span class="input-group-text">Completed Transaction Rate</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="mt-5">
+					<p>Select the industry and subvertical in which {{nameOfBusiness}} operates. This information will be used to estimate Yext benchmarks for impressions across your online listings in the case that you do not have Google My Business data.</p>
+				</div>
+				<!-- HERE ARE THE DEPENENT DROPDOWNS -->
+				<div class="mt-5">
+					<select id="industry" style="display: inline-block; width: 170px;" name="" ng-model="subIndustries"
+						ng-change="setIndustry" class="form-control mr-2" ng-options="industry for (industry, subIndustry) in benchmarks">
+						<option value="">Select Industry</option>
+					</select>
+					<select id="subindustry" style="display: inline-block; width: 270px;" name="" ng-disabled="!subIndustries" ng-model="subIndustry"
+						ng-change="updateImpressionsForSubIndustry()" class="form-control mr-2" ng-options="subIndustry for (subIndustry, details) in subIndustries">
+						<option value="">Select Sub-Vertical</option>
+					</select>
+				</div>
+				<button ng-click="stage = 4" class="btn btn-primary btn-block mt-5">Next</button>
+			</div>
+		</div>
+	</div>
+	<div class="container mt-7" ng-show="stage >= 4">
+		<div class="row justify-content-md-center">
+			<div class="col-md-10">
+				<h1 class="display-4 text-center">Business Value Assessment</h1>
+				<!-- <h1 class="display-4 text-center">Bad data could be costing {{nameOfBusiness}} <span class="highlight-number danger">{{ sales['DIFFERENCE'] | currency:"$":0}}</span> per year.</h1> -->
+				
+				<p class="headline">Based on the estimates below, your incremental revenue opportunity is <span class="highlight-number success">{{ optimization['DIFFERENCE'] | currency:"$":0 }}</span></p>
+
+				<p class="headline">This number is based on the following assumptions: </p>
+				<ul style="text-align: center; list-style-position: inside;">
+					<li class="headline" style="margin-bottom: 0rem; font-size: large;">A value of your local channel of <span class="highlight-number success" style="font-size: large;">{{ sales['OPTIMIZED'] | currency:"$":0 }}</span></li>
+					<li class="headline" style="margin-bottom: 0rem; font-size: large;">Revenue at risk from data accuracy of <span class="highlight-number danger" style="font-size: large;">{{ sales['DIFFERENCE'] | currency:"$":0 }}</span> </li>
+					<li class="headline" style="margin-bottom: 0rem; font-size: large;">An optimization lift in impressions of <span class="highlight-number success" style="font-size: large;">  {{ lowOptimizationRate }}%</span> to <span class="highlight-number success" style="font-size: large;">  {{ highOptimizationRate }}%</span> leading to an estimated incremental revenue of <span class="highlight-number success" style="font-size: large;"> {{ optimization['DIFFERENCE'] | currency:"$":0 }}</span></li>
+				</ul>
+			</div>
+			<div class="row">
+				<div class="col text-center">
+					<!-- <p>Want to see how we calculated this information?</p> -->
+					<button ng-hide="stage == 5" ng-click="stage = 5" class="btn btn-primary btn-lg" style="margin: 0 auto; display: block;">See Calculations</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="container mt-4" ng-show="stage == 5">
+	<hr/>
+		<div class="row mt-4">
+			<div class="col-md-3 mt-2">
+				<p>Business Name</p>
+				<input ng-model="nameOfBusiness" class="form-control mr-2" type="text" placeholder="Business Name">
+			</div>
+			<div class="col-md-2 mt-2">
+				<p>Industry</p>
+				<select id="industry" style="display: inline-block; width: 170px;" name="" ng-model="subIndustries"
+					ng-change="setIndustry" class="form-control mr-2" ng-options="industry for (industry, subIndustry) in benchmarks">
+					<option value="">Select Industry</option>
+				</select>
+			</div>
+			<div class="col-md-4 mt-2">
+				<p>Sub-Vertical</p>
+				<select id="subindustry" style="display: inline-block; width: 270px;" name="" ng-disabled="!subIndustries" ng-model="subIndustry"
+					ng-change="updateImpressionsForSubIndustry()" class="form-control mr-2" ng-options="subIndustry for (subIndustry, details) in subIndustries">
+					<option value="">Select Sub-Vertical</option>
+				</select>
+			</div>
+		</div>
+
+		<div class="">
+			<p class="mt-4 text-secondary small">Auto-populated impressions and actions metrics are proprietary Yext Benchmarks comprised of 6,896 clients across 7 verticals.</p>
+		</div>
+		<div class="row mt-2">
+			<div class="col">
+				<table class="table">
+					<thead>
+						<tr>
+							<th style="width: 40%"></th>
+							<th style="width: 45px"></th>
+							<th style="width: 130px">Inputs</th>
+							<th style="width: 50%">Performance Today</th>
+							<th style="width: 50%">Value of Local Channel</th>
+							<th style="width: 50%">Opportunity Cost</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Annual Impressions<br />per Entity</td>
+							<td><i class="fa fa-question-circle" data-toggle="tooltip" data-placement="top" title="How many times each entity appears in a consumer search annually."></i></td>
+							<td><input ng-model="estAnnualImpressionsPerLoc" ng-change="refresh()" class="form-control" type="Number"></td>
+							<td>
+								<div class="funnel-number">{{ estAnnualImpressionsPerLoc | number:0 }}</div>
+								<div class="funnel-detail">impressions per entity</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ estAnnualImpressionsPerLoc | number:0 }}</div>
+								<div class="funnel-detail">impressions per entity</div>
+							</td>
+							<td>
+								<div class="funnel-number">-</div>
+							</td>
+						</tr>
+						<tr>
+							<td>Number of Entities</td>
+							<td><i class="fa fa-question-circle" data-toggle="tooltip" data-placement="top" title="The number of entities you currently manage (the more there are, the larger the impact)."></i></td>
+							<td><input ng-model="numberOfLocations" ng-change="refresh()" class="form-control" type="Number"></td>
+							<td>
+								<div class="funnel-number">{{ totalImpressions['CURRENT'] | number:0 }}</div>
+								<div class="funnel-detail">total impressions</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ totalImpressions['OPTIMIZED'] | number:0 }}</div>
+								<div class="funnel-detail">total impressions</div>
+							</td>
+							<td>
+								<div class="funnel-number">-</div>
+							</td>
+						</tr>
+						<tr>
+							<td>Impressions with<br />Accurate Information</td>
+							<td><i class="fa fa-question-circle" data-toggle="tooltip" data-placement="top" title="How often customers see correct information when they search for you online."></i></td>
+							<td>
+								<div class="input-group">
+									<input ng-model="accuracyRate" ng-change="refresh()" class="form-control" type="Number">
+									<div class="input-group-append">
+										<span class="input-group-text">%</span>
+									</div>
+								</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ accurateImpressions['CURRENT'] | number:0 }}</div>
+								<div class="funnel-detail">{{ accuracyRate }}% of Total Impressions</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ accurateImpressions['OPTIMIZED'] | number:0 }}</div>
+								<div class="funnel-detail">100% of Total Impressions</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ accurateImpressions['DIFFERENCE'] | number:0 }}</div>
+								<div class="funnel-detail">{{ 100-accuracyRate }}% of Total Impressions</div>
+							</td>
+						</tr>
+						</tbody>
+				</table>
+			</div>
+		</div>
+			<div class="row mt-2">
+			<div class="col">
+				<table class="table">
+					<thead>
+						<tr>
+							<th style="width: 40%">CALLS</th>
+							<th style="width: 45px"></th>
+							<th style="width: 130px">Inputs</th>
+							<th style="width: 50%">Performance Today</th>
+							<th style="width: 50%">Value of Local Channel</th>
+							<th style="width: 50%">Opportunity Cost</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Call Rate</td>			
+							<td><i class="fa fa-question-circle" data-toggle="tooltip" data-placement="top" title="How often customers click to call on your listing impressions."></i></td>
+							<td>
+								<div class="input-group">
+									<input ng-model="estAnnualCallActionsPerLoc" ng-change="refresh()" class="form-control" type="Number">
+									<div class="input-group-append">
+										<span class="input-group-text">%</span>
+									</div>
+								</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ callActions['CURRENT'] | number:0 }}</div>
+								<div class="funnel-detail">Calls</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ callActions['OPTIMIZED'] | number:0 }}</div>
+								<div class="funnel-detail">Calls</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ callActions['DIFFERENCE'] | number:0 }}</div>
+								<div class="funnel-detail">Calls</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<!-- <td>Call Conversions</td> -->
+							<td>Calls for Appointments, Orders, etc.</td>
+							<td><i class="fa fa-question-circle" data-toggle="tooltip" data-html="true" data-placement="top" title="How often customers that call create an appointment or order."></i></td>
+							<td>
+								<div class="input-group">
+									<input ng-model="CallApptRate" ng-change="refresh()" class="form-control" type="Number">
+									<div class="input-group-append">
+										<span class="input-group-text">%</span>
+									</div>
+								</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ callAppts['CURRENT'] | number:0 }}</div>
+								<div class="funnel-detail">Calls for Appointments or Orders</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ callAppts['OPTIMIZED'] | number:0 }}</div>
+								<div class="funnel-detail">Calls for Appointments or Orders</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ callAppts['DIFFERENCE'] | number:0 }}</div>
+								<div class="funnel-detail">Calls for Appointments or Orders</div>
+							</td>
+						</tr>
+						<tr>
+							<td>Completed Transactions from Call Rate</td>
+							<td><i class="fa fa-question-circle" data-toggle="tooltip" data-placement="top" title="The percentage of calls that result in a conversion."></i></td>
+							<td>
+								<div class="input-group">
+									<input ng-model="callClickCompletionRate" ng-change="refresh()" class="form-control" type="Number">
+									<div class="input-group-append">
+										<span class="input-group-text">%</span>
+									</div>
+								</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ callClickCompletions['CURRENT'] | number:0 }}</div>
+								<div class="funnel-detail">Completed Call Conversions</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ callClickCompletions['OPTIMIZED'] | number:0 }}</div>
+								<div class="funnel-detail">Completed Call Conversions</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ callClickCompletions['DIFFERENCE'] | number:0 }}</div>
+								<div class="funnel-detail">Completed Call Conversions</div>
+							</td>
+						</tr>					
+						</tbody>
+				</table>
+			</div>
+		</div>
+			<div class="row mt-2">
+			<div class="col">
+				<table class="table">
+					<thead>
+						<tr>
+							<th style="width: 40%">WEBSITE CLICKS</th>
+							<th style="width: 45px"></th>
+							<th style="width: 130px">Inputs</th>
+							<th style="width: 50%">Performance Today</th>
+							<th style="width: 50%">Value of Local Channel</th>
+							<th style="width: 50%">Opportunity Cost</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Website Click Rate</td>
+							<td><i class="fa fa-question-circle" data-toggle="tooltip" data-placement="top" title="How often customers click to your website on your listing impressions."></i></td>
+							<td>
+								<div class="input-group">
+									<input ng-model="estAnnualClickActionsPerLoc" ng-change="refresh()" class="form-control" type="Number">
+									<div class="input-group-append">
+										<span class="input-group-text">%</span>
+									</div>
+								</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ clickActions['CURRENT'] | number:0 }}</div>
+								<div class="funnel-detail">Website Clicks</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ clickActions['OPTIMIZED'] | number:0 }}</div>
+								<div class="funnel-detail">Website Clicks</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ clickActions['DIFFERENCE'] | number:0 }}</div>
+								<div class="funnel-detail">Website Clicks</div>
+							</td>
+						</tr>
+						<tr>
+						<td>Online CTA Click-Through-Rate</td>
+							<td><i class="fa fa-question-circle" data-toggle="tooltip" data-html="true" data-placement="top" title="How often customers that click through to the website create an appointment or order."></i></td>
+							<td>
+								<div class="input-group">
+									<input ng-model="CTA" ng-change="refresh()" class="form-control" type="Number">
+									<div class="input-group-append">
+										<span class="input-group-text">%</span>
+									</div>
+								</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ CTAClicks['CURRENT'] | number:0 }}</div>
+								<div class="funnel-detail">Website CTA Clicks</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ CTAClicks['OPTIMIZED'] | number:0 }}</div>
+								<div class="funnel-detail">Website CTA Clicks</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ CTAClicks['DIFFERENCE'] | number:0 }}</div>
+								<div class="funnel-detail">Website CTA Clicks</div>
+							</td>
+						</tr>
+						<tr>
+							<td>Completed Transactions from Website CTA Rate</td>
+							<td><i class="fa fa-question-circle" data-toggle="tooltip" data-placement="top" title="The percentage of CTA clicks that result in a conversion."></i></td>
+							<td>
+								<div class="input-group">
+									<input ng-model="ClickCompletionRate" ng-change="refresh()" class="form-control" type="Number">
+									<div class="input-group-append">
+										<span class="input-group-text">%</span>
+									</div>
+								</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ ClickCompletions['CURRENT'] | number:0 }}</div>
+								<div class="funnel-detail">Online CTA Conversions</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ ClickCompletions['OPTIMIZED'] | number:0 }}</div>
+								<div class="funnel-detail">Online CTA Conversions</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ ClickCompletions['DIFFERENCE'] | number:0 }}</div>
+								<div class="funnel-detail">Online CTA Conversions</div>
+							</td>
+						</tr>	
+						</tbody>
+				</table>
+			</div>
+		</div>
+			<div class="row mt-2">
+			<div class="col">
+				<table class="table">
+					<thead>
+						<tr>
+							<th style="width: 40%">GET DIRECTIONS</th>
+							<th style="width: 45px"></th>
+							<th style="width: 130px">Inputs</th>
+							<th style="width: 50%">Performance Today</th>
+							<th style="width: 50%">Value of Local Channel</th>
+							<th style="width: 50%">Opportunity Cost</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Get Directions Rate</td>
+							<td><i class="fa fa-question-circle" data-toggle="tooltip" data-placement="top" title="How often customers click to get directions on your listing impressions."></i></td>
+							<td>
+								<div class="input-group">
+									<input ng-model="estAnnualDirectionsActionsPerLoc" ng-change="refresh()" class="form-control" type="Number">
+									<div class="input-group-append">
+										<span class="input-group-text">%</span>
+									</div>
+								</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ directionsActions['CURRENT'] | number:0 }}</div>
+								<div class="funnel-detail">Get Directions</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ directionsActions['OPTIMIZED'] | number:0 }}</div>
+								<div class="funnel-detail">Get Directions</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ directionsActions['DIFFERENCE'] | number:0 }}</div>
+								<div class="funnel-detail">Get Directions</div>
+							</td>
+						</tr>
+						<tr>
+							<!-- <td>Online to<br />Offline Rate</td> -->
+							<td>Directions to Visit Rate</td>
+							<td><i class="fa fa-question-circle" data-toggle="tooltip" data-html="true" data-placement="top" title="How often customers that click Get Directions visit a physical location. Google estimates that 76% of people who search for something nearby visit a business within a day.<sup>1</sup>"></i></td>
+							<td>
+								<div class="input-group">
+									<input ng-model="onlineToOffline" ng-change="refresh()" class="form-control" type="Number">
+									<div class="input-group-append">
+										<span class="input-group-text">%</span>
+									</div>
+								</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ storeVistors['CURRENT'] | number:0 }}</div>
+								<div class="funnel-detail">Store Visitors</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ storeVistors['OPTIMIZED'] | number:0 }}</div>
+								<div class="funnel-detail">Store Visitors</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ storeVistors['DIFFERENCE'] | number:0 }}</div>
+								<div class="funnel-detail">Store Visitors</div>
+							</td>
+						</tr>
+						<tr>
+							<td>In Store Conversion Rate</td>
+							<td><i class="fa fa-question-circle" data-toggle="tooltip" data-placement="top" title="The percentage of in-person visits that result in a purchase."></i></td>
+							<td>
+								<div class="input-group">
+									<input ng-model="instoreConversionRate" ng-change="refresh()" class="form-control" type="Number">
+									<div class="input-group-append">
+										<span class="input-group-text">%</span>
+									</div>
+								</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ purchases['CURRENT'] | number:0 }}</div>
+								<div class="funnel-detail">In-Store Purchases</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ purchases['OPTIMIZED'] | number:0 }}</div>
+								<div class="funnel-detail">In-Store Purchases</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ purchases['DIFFERENCE'] | number:0 }}</div>
+								<div class="funnel-detail">In-Store Purchases</div>
+							</td>
+						</tr>
+						</tbody>
+				</table>
+			</div>
+		</div>
+			<div class="row mt-2">
+			<div class="col">
+				<table class="table">
+					<thead>
+						<tr>
+							<th style="width: 40%">TOTAL REVENUE</th>
+							<th style="width: 45px"></th>
+							<th style="width: 130px">Inputs</th>
+							<th style="width: 50%">Performance Today</th>
+							<th style="width: 50%">Value of Local Channel</th>
+							<th style="width: 50%">Opportunity Cost</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<!-- <td>In Store Sale<br />Per Customer</td> -->
+							<td>Average Sale per Customer</td>
+							<td><i class="fa fa-question-circle" data-toggle="tooltip" data-placement="top" title="Your average order value (AOV) or average patient / client value."></i></td>
+							<td>
+								<div class="input-group">
+									<div class="input-group-prepend">
+										<span class="input-group-text">$</span>
+									</div>
+									<input ng-model="averageSalePerCustomer" ng-change="refresh()" class="form-control" type="Number">
+								</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ sales['CURRENT'] | currency:"$":0 }}</div>
+								<div class="funnel-detail">Sales</div>
+							</td>
+							<td>
+								<div class="funnel-number">{{ sales['OPTIMIZED'] | currency:"$":0 }}</div>
+								<div class="funnel-detail">Sales</div>
+							</td>
+							<td>
+								<div class="funnel-number"><font color="red">{{ sales['DIFFERENCE'] | currency:"$":0 }}</font></div>
+								<div class="funnel-detail">Revenue at Risk</div>
+							</td>
+						</tr>
+						<tr>							
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<div>
+			<div class = "row">
+				<div class = "col">
+					<p>Revenue Lift from Optimization</p>
+				</div>
+			</div>
+			<table>
+				<tbody>
+					<tr class="justify-content-md-center" style="text-align: center;">
+						<td>Incremental Revenue</td>
+						<td>
+							<div>
+								<h3> = </h3>
+							</div>
+						</td>
+						<td>
+							<div class="funnel-number">{{ sales['OPTIMIZED'] | currency:"$":0 }}</div>
+							<div class="funnel-detail">Value of Local Channel</div>
+						</td>
+						<td>
+							<div>
+								<h3>&ensp; X &ensp;</h3>
+							</div>
+						</td>
+						<td>
+							<div class="input-group col-12 mb-2">
+								<input ng-model="lowOptimizationRate" ng-change="refresh()" class="form-control  text-center" type="Number">
+								<div class="input-group-append">
+									<span class="input-group-text">% Lift</span>
+									<div class="col-25"><h5>&ensp; {{ lowOptimization | currency:"$":0 }}</h5>
+										
+									</div>
+
+								</div>
+							</div>
+							<div class="input-group col-12 mb-2">
+								<input ng-model="mediumOptimizationRate" ng-change="refresh()" class="form-control  text-center" type="Number">
+								<div class="input-group-append">
+									<span class="input-group-text">% Lift</span>
+									<div class="col-25"><h5>&ensp; {{ mediumOptimization | currency:"$":0 }}</h5>
+										
+									</div>
+								</div>
+							</div>
+							<div class="input-group col-12">
+								<input ng-model="highOptimizationRate" ng-change="refresh()" class="form-control  text-center" type="Number">
+								<div class="input-group-append">
+									<span class="input-group-text">% Lift</span>
+									<div class="col-25"><h5>&ensp; {{ highOptimization | currency:"$":0 }}</h5>
+										
+									</div>
+								</div>
+							</div>
+						</td>
+						<td>
+							<div>
+								<p>Low Impact</p>
+							</div>
+							<div>
+								<p>Medium Impact</p>
+							</div>
+							<div>
+								<p>High Impact</p>
+							</div>
+						</td>
+						<td>
+							<div>
+								<h3>&ensp; = &ensp;</h3>
+							</div>
+						</td>
+						<td style="border: 2px solid black; padding: 10px;">
+							<div class="funnel-number">{{ optimization['OPTIMIZED'] | currency:"$":0 }}</div>
+							<div class="funnel-detail">Incremental Revenue<br>(Average of Low, Med, High)</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<hr>
+		<div>
+			<div class = "row">
+				<div class = "col">
+					<p>Total Incremental Revenue Opportunity</p>
+				</div>
+			</div>
+			<table>
+				<tbody>
+					<tr>
+						<td style="border: 2px solid red; padding: 10px;">
+							<div class="funnel-number">{{ sales['DIFFERENCE'] | currency:"$":0 }}</div>
+							<div class="funnel-detail" >Revenue at Risk</div>
+						</td>
+						<td>
+							<div>
+								<h3>&ensp; + &ensp;</h3>
+							</div>
+						</td>
+						<td style="border: 2px solid black; padding: 10px;">
+							<div class="funnel-number">{{ optimization['OPTIMIZED'] | currency:"$":0 }}</div>
+							<div class="funnel-detail">Incremental Revenue <br/> from Optimization</div>
+						</td>
+						<td>
+							<div>
+								<h3>&ensp; = &ensp;</h3>
+							</div>
+						</td>
+						<td style="border: 15px solid green; padding: 20px;">
+							<div class="funnel-number">{{ optimization['DIFFERENCE'] | currency:"$":0 }}</div>
+							<div class="funnel-detail">Total Incremental Revenue</div>
+						</td>
+					</tr>
+						
+					
+				</tbody>
+			</table>
+		</div>
+	</div>
+		<div class="container">
+			<hr/>
+		</div>
+	<div class="container" ng-show="stage == 5" >
+		<p class="text-secondary small"><sup>1</sup><a href='https://www.thinkwithgoogle.com/consumer-insights/mobile-search-trends-consumers-to-stores/' target="_blank">Think with Google</a>, May 2016.</p>
+	</div>
+	<div class="container mt-5 disclaimer" ng-show="stage >= 4">
+		<p class="mt-5 text-secondary small">The estimates and assumptions used in this calculator are based on a sample of existing Yext customers and may not be representative of your business. Use of other estimates and assumptions, including those more representative of your business, could significantly alter the estimated results.  Actual results will vary and return is not guaranteed.</p>
+		<p class="mt-3 text-secondary small">Yext, Inc. and its affiliates ("Yext") do not make any guarantee or other promise as to any results that may be obtained using Yext's products and/or services or the accuracy or completeness of this tool or any data or assumptions herein.  Any results or outputs obtained from using this tool are for informational purposes only and must not be relied upon or distributed externally outside your organization.  To the maximum extent permitted by law, Yext disclaims any and all liability related to your use of this tool.</p>
+	</div>
+</body>
